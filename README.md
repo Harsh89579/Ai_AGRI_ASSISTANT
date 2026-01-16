@@ -3,7 +3,7 @@ The system follows a RAG-first, LLM-fallback strategy to ensure reliable, cost-e
 
 🧠 “Database se jankari mile to wahi do, warna LLM se intelligent jawab lao.”
 
-🚀 Key Highlights
+##🚀 Key Highlights
 
 ✅ RAG-first architecture (LLM sirf tab jab data na mile)
 
@@ -19,7 +19,7 @@ The system follows a RAG-first, LLM-fallback strategy to ensure reliable, cost-e
 
 ✅ Production-ready backend design
 
-🏗️ System Architecture
+##🏗️ System Architecture
 
  Client (UI / API)
       │
@@ -35,7 +35,7 @@ Chat Orchestrator
          ├── Prompt Guardrails
          └── Weak Response Filter
 
-🧩 Microservices Overview
+##🧩 Microservices Overview
 Service	Responsibility
 API Gateway	Single entry point, routing & CORS
 Chat Orchestrator	Controls full conversation flow
@@ -43,7 +43,7 @@ NLU Service	Rule-based intent & crop detection
 RAG Service	Knowledge lookup from SQLite DB
 LLM Service	Groq LLM calls with safety controls
 
-🔁 Request Flow (RAG-First Logic)
+##🔁 Request Flow (RAG-First Logic)
 
 User sends message
 
@@ -59,7 +59,7 @@ If LLM weak/fails → safe fallback response
 
 Save full chat history
 
-🛠️ Tech Stack
+##🛠️ Tech Stack
 
 Backend: FastAPI, Python
 
@@ -75,7 +75,7 @@ Testing: Pytest, HTTPX
 
 Language: Hinglish (Hindi + English)
 
-📦 Project Structure
+##📦 Project Structure
  backend/
 └── services/
     ├── api_gateway/
@@ -87,17 +87,17 @@ Language: Hinglish (Hindi + English)
     └── .env
 
 
-🐳 Run with Docker (Recommended)
+##🐳 Run with Docker (Recommended)
 docker compose build
 docker compose up -d
 
-Services will be available on:
+##Services will be available on:
 
 API Gateway → http://localhost:8000
 
 Swagger Docs → http://localhost:8000/docs
 
-🌱 Future Enhancements
+##🌱 Future Enhancements
 
 🎤 Voice input/output (STT + TTS)
 
@@ -109,7 +109,7 @@ Swagger Docs → http://localhost:8000/docs
 
 🌍 Multi-language support
 
-🏆 What This Project Demonstrates
+##🏆 What This Project Demonstrates
 
 Production-grade AI backend design
 
@@ -121,7 +121,7 @@ Real-world debugging & cloud LLM usage
 
 Scalable, interview-ready system
 
-👨‍💻 Author
+##👨‍💻 Author
 
 Harsh Tripathi
 AI / Backend / Applied LLM Systems
