@@ -129,7 +129,8 @@ async def call_rag_service(intent: str, entities: dict, message: str):
         res.raise_for_status()
         data = res.json()
 
-    return data.get("context", "")
+    return data.get("context", ""), data.get("source", "generic")
+
 
 
 async def call_llm_service(message, intent, entities, context_data):
@@ -183,28 +184,34 @@ async def chat(req: ChatRequest):
     intent, entities = await call_nlu_service(user_message)
 
     # 2️⃣ RAG
-    context_data = await call_rag_service(intent, entities, user_message)
+    context_data, rag_source = await call_rag_service(intent, entities, user_message)
+
 
     # 3️⃣ LLM
-    try:
-        final_answer = await call_llm_service(
-            user_message,
-            intent,
-            entities,
-            context_data
-        )
-
-        weak_phrases = ["sorry", "problem", "context de", "samajh nahi"]
-        if any(p in final_answer.lower() for p in weak_phrases):
-            raise ValueError("Weak LLM response")
-
-    except Exception as e:
-        print("⚠️ LLM unusable, switching to RAG:", e)
+    
+    # CASE 1: REAL RAG HIT
+    if rag_source != "generic":
         final_answer = rag_fallback_answer(
             intent=intent,
             entities=entities,
             context_data=context_data
         )
+    # CASE 2: RAG MISS → LLM fallback
+    else:
+        try:
+            final_answer = await call_llm_service(
+                user_message,
+                intent,
+                entities,
+                context_data=""
+            )
+        except Exception as e:
+            print("⚠️ LLM API failed:", e)
+            final_answer = (
+                "Is sawal ke liye abhi exact jankari uplabdh nahi hai. "
+                "Kripya thoda aur detail batayein."
+            )
+
 
     # 4️⃣ Save chat history (FAIL-SAFE)
     try:

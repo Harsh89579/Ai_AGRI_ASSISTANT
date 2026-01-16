@@ -1,9 +1,12 @@
 from fastapi import FastAPI, Header, HTTPException
 from pydantic import BaseModel
 import time
-from services.llm_client import call_llm_async
+from fastapi.concurrency import run_in_threadpool
+
 from config import SERVICE_API_KEY
+from services.llm_client import call_llm
 from utils.formatter import build_prompt
+
 from prometheus_client import Counter, Histogram, generate_latest, CONTENT_TYPE_LATEST
 
 # ---------------- App Init ----------------
@@ -22,25 +25,6 @@ FAIL_COUNT = 0
 FAIL_THRESHOLD = 3      # consecutive failures
 COOLDOWN = 30           # seconds
 
-# ---------------- Weak Response Detection ----------------
-
-WEAK_PHRASES = [
-    "sorry",
-    "as an ai",
-    "i am not sure",
-    "cannot help",
-    "no information",
-    "please provide"
-]
-
-def is_weak_response(text: str) -> bool:
-    if not text:
-        return True
-    if len(text.strip()) < 40:
-        return True
-    t = text.lower()
-    return any(p in t for p in WEAK_PHRASES)
-
 # ---------------- Request Model ----------------
 
 class LLMRequest(BaseModel):
@@ -55,7 +39,6 @@ class LLMRequest(BaseModel):
 @app.post("/generate")
 async def generate(req: LLMRequest, x_api_key: str = Header(None)):
 
-    # ✅ global declaration MUST be at top
     global FAIL_COUNT, CIRCUIT_OPEN, CIRCUIT_UNTIL
 
     # 🔐 Auth check
@@ -81,17 +64,14 @@ async def generate(req: LLMRequest, x_api_key: str = Header(None)):
     )
 
     try:
-        answer = await call_llm_async(
+        # ✅ Sync LLM safely called inside async endpoint
+        answer = await run_in_threadpool(
+            call_llm,
             prompt["system"],
             prompt["user"]
         )
 
-
-        # STEP-2C
-        if is_weak_response(answer):
-            raise ValueError("Weak LLM response detected")
-
-        # ✅ success → reset breaker
+        # success → reset breaker
         FAIL_COUNT = 0
         CIRCUIT_OPEN = False
 
@@ -105,11 +85,8 @@ async def generate(req: LLMRequest, x_api_key: str = Header(None)):
 
         return {
             "final_answer": (
-                "Abhi AI response reliable nahi hai.\n"
-                "👉 Kripya crop ka naam, "
-                "uski stage (jaise 20–25 din), "
-                "aur problem ke lakshan batayein.\n"
-                "Main turant madad karunga."
+                "Is sawal ke liye abhi exact jankari uplabdh nahi hai. "
+                "Kripya thoda aur detail batayein."
             ),
             "metadata": {
                 "error": str(e),
@@ -123,7 +100,7 @@ async def generate(req: LLMRequest, x_api_key: str = Header(None)):
     return {
         "final_answer": answer,
         "metadata": {
-            "model": "llm-service",
+            "model": "groq",
             "latency_s": latency
         }
     }

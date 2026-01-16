@@ -1,48 +1,39 @@
-import asyncio
-import httpx
-from config import OPENAI_API_KEY, MODEL_NAME
+import os
+import requests
 
-OPENAI_URL = "https://api.openai.com/v1/chat/completions"
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+MODEL = os.getenv("GROQ_MODEL", "llama3-8b-8192")
 
-HEADERS = {
-    "Authorization": f"Bearer {OPENAI_API_KEY}",
-    "Content-Type": "application/json",
-}
+GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
 
-async def call_llm_async(
-    system: str,
-    user: str,
-    max_tokens: int = 350,
-    timeout: int = 20,
-    retries: int = 2,
-) -> str:
-    last_err = None
+def call_llm(system, user, max_tokens=300):
+    if not GROQ_API_KEY:
+        raise RuntimeError("GROQ_API_KEY not set inside container")
 
-    payload = {
-        "model": MODEL_NAME,
-        "messages": [
-            {"role": "system", "content": system},
-            {"role": "user", "content": user},
-        ],
-        "max_tokens": max_tokens,
+    headers = {
+        "Authorization": f"Bearer {GROQ_API_KEY}",
+        "Content-Type": "application/json"
     }
 
-    async with httpx.AsyncClient(timeout=timeout) as client:
-        for attempt in range(retries + 1):
-            try:
-                resp = await client.post(
-                    OPENAI_URL,
-                    headers=HEADERS,
-                    json=payload,
-                )
-                resp.raise_for_status()
+    payload = {
+        "model": MODEL,
+        "messages": [
+            {"role": "system", "content": system},
+            {"role": "user", "content": user}
+        ],
+        "temperature": 0.4,
+        "max_tokens": max_tokens
+    }
 
-                data = resp.json()
-                return data["choices"][0]["message"]["content"].strip()
+    resp = requests.post(
+        GROQ_URL,
+        headers=headers,
+        json=payload,
+        timeout=20
+    )
 
-            except Exception as e:
-                last_err = e
-                if attempt < retries:
-                    await asyncio.sleep(1 + attempt)
+    # 🔥 VERY IMPORTANT FOR DEBUG
+    if resp.status_code != 200:
+        raise RuntimeError(f"{resp.status_code} {resp.text}")
 
-    raise last_err
+    return resp.json()["choices"][0]["message"]["content"].strip()

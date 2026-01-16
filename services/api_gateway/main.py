@@ -37,7 +37,10 @@ async def proxy_chat_history(session_id: str):
     try:
         async with httpx.AsyncClient() as client:
          
-         res = await client.get(f"http://127.0.0.1:8001/api/chat/history/{session_id}")
+         res = await client.get(
+           f"http://chat_orchestrator:8000/api/chat/history/{session_id}"
+       )
+
          res.raise_for_status()
          return res.json()
     except httpx.HTTPStatusError as e:
