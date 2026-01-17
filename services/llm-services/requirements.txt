@@ -4,5 +4,4 @@ pydantic
 python-dotenv
 requests
 prometheus-client
-pytest
 httpx
