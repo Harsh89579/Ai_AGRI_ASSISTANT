@@ -1,16 +1,11 @@
 services:
-
   api_gateway:
     build: ./api_gateway
-    ports:
-      - "8000:8000"
     depends_on:
       - chat_orchestrator
 
   chat_orchestrator:
     build: ./chat_orchestrator
-    ports:
-      - "8001:8000"
     volumes:
       - ./chat_orchestrator/data:/app/data
     depends_on:
@@ -20,13 +15,9 @@ services:
 
   nlu_llm:
     build: ./nlu_llm
-    ports:
-      - "8002:8000"
 
   rag_service:
     build: ./rag_services
-    ports:
-      - "8003:8000"
     volumes:
       - ./chat_orchestrator/data:/app/data
 
@@ -34,12 +25,3 @@ services:
     build: ./llm-services
     env_file:
       - .env
-    ports:
-      - "8004:8000"
-
-  frontend:
-    build: ../../frontend
-    ports:
-      - "8501:8501"
-    depends_on:
-      - api_gateway
