@@ -1,0 +1,62 @@
+version: "3.9"
+
+services:
+  api_gateway:
+    build: ../services/api_gateway
+    ports:
+      - "8000:8000"
+    depends_on:
+      - chat_orchestrator
+    networks:
+      - agri-network
+
+  chat_orchestrator:
+    build: ../services/chat_orchestrator
+    ports:
+      - "8001:8000"
+    volumes:
+      - ../services/chat_orchestrator/data:/app/data
+    depends_on:
+      - nlu_llm
+      - rag_service
+      - llm_service
+    networks:
+      - agri-network
+
+  nlu_llm:
+    build: ../services/nlu_llm
+    ports:
+      - "8002:8000"
+    networks:
+      - agri-network
+
+  rag_service:
+    build: ../services/rag_services
+    ports:
+      - "8003:8000"
+    volumes:
+      - ../services/chat_orchestrator/data:/app/data
+    networks:
+      - agri-network
+
+  llm_service:
+    build: ../services/llm-services
+    ports:
+      - "8004:8000"
+    env_file:
+      - ../.env
+    networks:
+      - agri-network
+
+  frontend:
+    build: ../frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - api_gateway
+    networks:
+      - agri-network
+
+networks:
+  agri-network:
+    driver: bridge
