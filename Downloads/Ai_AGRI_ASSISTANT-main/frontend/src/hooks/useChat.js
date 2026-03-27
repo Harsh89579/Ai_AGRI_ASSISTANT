@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
-const API_BASE_URL = 'http://localhost:8000/api/chat';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+const CHAT_URL = `${API_BASE_URL}/api/chat`;
 
 export const useChat = () => {
     const [sessionId, setSessionId] = useState('');
@@ -37,7 +38,7 @@ export const useChat = () => {
 
     const loadChatHistory = async (id) => {
         try {
-            const res = await fetch(`http://localhost:8000/api/chat/history/${id}`);
+            const res = await fetch(`${API_BASE_URL}/api/chat/history/${id}`);
             if (res.ok) {
                 const data = await res.json();
                 setMessages(data.history.map(h => ({
@@ -54,7 +55,7 @@ export const useChat = () => {
 
     const refreshSessions = async () => {
         try {
-            const res = await fetch(`http://localhost:8000/api/chat/session`);
+            const res = await fetch(`${API_BASE_URL}/api/chat/session`);
             if (res.ok) {
                 const data = await res.json();
                 setSessions(data);
@@ -77,7 +78,7 @@ export const useChat = () => {
         setIsLoading(true);
 
         try {
-            const resp = await fetch(API_BASE_URL, {
+            const resp = await fetch(CHAT_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ session_id: sessionId, message: text }),

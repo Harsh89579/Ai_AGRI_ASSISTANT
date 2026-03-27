@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+pydantic
+python-dotenv
+httpx
+psutil
+aiosqlite
+loguru
+rapidfuzz
+requests
+prometheus-client
