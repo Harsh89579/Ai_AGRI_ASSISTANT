@@ -1,11 +1,9 @@
 from pydantic import BaseModel
 
-
 class NLUResult(BaseModel):
     intent: str
     crop: str | None = None
     language: str = "hi-en"
-
 
 def detect_intent_and_crop(text: str) -> NLUResult:
     t = text.lower()

@@ -37,7 +37,7 @@ export const useChat = () => {
 
     const loadChatHistory = async (id) => {
         try {
-            const res = await fetch(`http://localhost:8000/api/chat/history/${id}`);
+            const res = await fetch(`${API_BASE_URL}/history/${id}`);
             if (res.ok) {
                 const data = await res.json();
                 setMessages(data.history.map(h => ({
@@ -54,7 +54,7 @@ export const useChat = () => {
 
     const refreshSessions = async () => {
         try {
-            const res = await fetch(`http://localhost:8000/api/chat/session`);
+            const res = await fetch(`${API_BASE_URL}/session`);
             if (res.ok) {
                 const data = await res.json();
                 setSessions(data);
