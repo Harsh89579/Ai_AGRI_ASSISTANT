@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+pydantic
+httpx
+python-dotenv
+aiosqlite
+loguru
+rapidfuzz
+psutil
